@@ -174,10 +174,7 @@ int main(int argc, char *argv[])
   // Select whether ZK architecture is sequential or parallel based on
   // the binary name (sequential=="ZK"), parallel=="ZK_MPI")
 
-G4bool sequentialBuild = true;
-  std::string arg0 = argv[0];
-  if(arg0=="ZKBrem_MPI")
-    sequentialBuild = false;
+G4bool sequentialBuild = false;
 
 std::cout << "Sequential Build Set to: " << sequentialBuild << std::endl;
   //////////////////////////////////////////////
