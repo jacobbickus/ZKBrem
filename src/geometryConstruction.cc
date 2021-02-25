@@ -2110,7 +2110,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
 
 void geometryConstruction::BuildTarget(G4String name, vector<G4Material*> v_mats, vector<double> v_thickness, double width, double length, G4String opt)
 {
-  if (opt != "D" && opt != "X" && opt != "S") {//G4cout << "bad opt " << opt << ". Aborting..." << G4endl; exit(1);}
+  if (opt != "D" && opt != "X" && opt != "S") {G4cout << "bad opt " << opt << ". Aborting..." << G4endl; exit(1);}
 
   const size_t nLayers = v_thickness.size();
   vector< G4Box* > v_boxes;
@@ -2180,8 +2180,6 @@ void geometryConstruction::BuildTarget(G4String name, vector<G4Material*> v_mats
 
 G4LogicalVolume * geometryConstruction::BuildHPGe(unsigned int ind, G4ThreeVector pos, G4RotationMatrix * rot, double gA, double gB, double gC, double gD, double gE, double gF, double gG, double gH, double gI, double gJ, double gK, double gL, double gM, double gN)
 {
-  //G4cout<<"\n\nBuilding detector "<<ind<<"...\n";
-
   char buff[128];
   sprintf(buff,"%d",ind);
   G4String is(buff);
@@ -2311,8 +2309,6 @@ G4LogicalVolume * geometryConstruction::BuildHPGe(unsigned int ind, G4ThreeVecto
                                                     det_box1_L,
                                                     false,
                                                     0);
-
-  //G4cout<<"Detector "<<ind<<" complete.\n\n";
 
   G4ThreeVector foilToDetRay = pos + HPGe_crystal_1_P->GetTranslation() - G4ThreeVector(0,0,U_plate_z);
   G4ThreeVector beamDir = G4ThreeVector(0,0,1);
