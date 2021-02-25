@@ -43,9 +43,7 @@ using namespace std;
 #include "rootStorageManager.hh"
 #include "runMetadata.hh"
 
-#ifdef ZK_MPI_ENABLED
 #include "MPIManager.hh"
-#endif
 
 
 int main(int argc, char *argv[])
@@ -185,15 +183,13 @@ std::cout << "Sequential Build Set to: " << sequentialBuild << std::endl;
   G4RunManager *theRunManager = new G4RunManager;
 
     // Initialize MPI before all the user classes
-#ifdef ZK_MPI_ENABLED
-  std::cout << "ZK_MPI_ENABLED" << std::endl;
+
   const G4int argcMPI = 2;
   char *argvMPI[argcMPI];
   argvMPI[0] = argv[0]; // binary name
   argvMPI[1] = (char *)"/tmp/ZKSlave"; // slave file base name
   std::cout << "Instantiating MPIManager" << std::endl;
   MPIManager *theMPIManager = new MPIManager(argcMPI,argvMPI);
-#endif
 
   // Assign the mandatory user-derived classes to the run manager and
   // initialize it before creation of the user actions so that it can
@@ -345,7 +341,6 @@ std::cout << "Sequential Build Set to: " << sequentialBuild << std::endl;
   // Current ZK instance is parallel //
   /////////////////////////////////////
 
-#ifdef ZK_MPI_ENABLED
   else{
     // Internally assign niceness of 19 to parallel builds of ZK
     G4int priority = 19;
@@ -365,7 +360,6 @@ std::cout << "Sequential Build Set to: " << sequentialBuild << std::endl;
 
     delete theMPIManager;
   }
-#endif
 
   // General garbage collection
 

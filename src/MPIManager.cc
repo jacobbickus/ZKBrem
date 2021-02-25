@@ -28,8 +28,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifdef ZK_MPI_ENABLED
-
 #include "G4RunManager.hh"
 
 #include "mpi.h"
@@ -55,11 +53,11 @@ MPIManager::MPIManager(int argcMPI, char *argvMPI[])
   // ensure that if multiple threads are present that only 1 thread
   // will make calls the MPI libraries at one time.
   MPI::Init_thread(argcMPI, argvMPI, MPI::THREAD_SERIALIZED);
-  
+
   // Get the size (number of) and the rank the present process
   size = MPI::COMM_WORLD.Get_size();
   rank = MPI::COMM_WORLD.Get_rank();
-  
+
   // Set G4bools for master/slave identification
   isMaster = (rank == RANK_MASTER);
   isSlave = (rank != RANK_MASTER);
@@ -106,9 +104,9 @@ MPIManager::~MPIManager()
 
   if(isSlave and slaveOut.is_open())
     slaveOut.close();
-  
+
   // MPI::Finalize() terminates the MPI execution environment
-  MPI::Finalize(); 
+  MPI::Finalize();
 }
 
 
@@ -128,30 +126,30 @@ void MPIManager::BeamOn(G4double events, G4bool distribute)
 
   // If set, distribute the total events to be processed evenly across
   // all available nodes, assigning possible "remainders" to master
-  if(distributeEvents){ 
-    
+  if(distributeEvents){
+
     slaveEvents = G4int(events/size);
     masterEvents = G4int(events-slaveEvents*(size-1));
-    
+
     if(isMaster) {
-      G4cout << "\nZK ANNOUNCEMENT: # events in master = " << masterEvents 
+      G4cout << "\nZK ANNOUNCEMENT: # events in master = " << masterEvents
 	     << " / # events in slave = "  << slaveEvents << "\n" << G4endl;
     }
-    
+
     totalEvents = events;
 
     // Error check to ensure events < range_G4int
     if(masterEvents > 2e9 or slaveEvents > 2e9)
       ThrowEventError();
-    
+
     // "Prepare to run the beam!"  "You're always preparing!  Just run
     // it!"  "Sir, you already used that joke in ZK.cc..."
-    if(isMaster) 
+    if(isMaster)
       G4RunManager::GetRunManager()->BeamOn(masterEvents);
     else
       G4RunManager::GetRunManager()->BeamOn(slaveEvents);
   }
-  
+
   // Otherwise, each node will run totalEvents number of events
   else {
 
@@ -159,16 +157,16 @@ void MPIManager::BeamOn(G4double events, G4bool distribute)
     masterEvents = G4int(events);
 
     if(isMaster)
-      G4cout << "\nZK ANNOUNCEMENT: # events in master = " << masterEvents 
+      G4cout << "\nZK ANNOUNCEMENT: # events in master = " << masterEvents
 	     << " / # events in slave = "  << slaveEvents << G4endl;
-    
+
     // Error check to ensure events < range_G4int
     if(events>2e9)
       ThrowEventError();
-      
+
     // Store the total number of events on all nodes
-    totalEvents = events*size;  
-    
+    totalEvents = events*size;
+
      // Ruuuuuuuuuuuuuuuuun that baby!
     runManager->BeamOn(G4int(events));
   }
@@ -189,7 +187,7 @@ void MPIManager::ThrowEventError()
 	 <<   "                number of primary events or distribute them across nodes such that\n"
 	 <<   "                (n_events < n_G4int_range = 2,147,483,647). ZK will now abort...\n"
 	 << G4endl;
-  
+
   G4Exception("MPIManager::ThrowEventError()","ZKMPIManagerException001", FatalException, "ZK ANNOUNCEMENT: Crashing this ship like the Hindenburg!\n");
 }
 
@@ -207,20 +205,20 @@ void MPIManager::CreateSeeds()
     G4long seed = G4long(x*LONG_MAX);
     seedPacket.push_back(seed);
   }
-  
+
   // Check to ensure that no two seeds are alike
   G4bool doubleCount = false;
   while(doubleCount){
     for(G4int i=0; i<size; i++)
       for(G4int j=0; j<size; j++)
-	
+
 	// If two seeds are the same, create a new seed
 	if( (i!=j) and (seedPacket[i] == seedPacket[j]) ){
 	  G4double x = G4UniformRand();
 	  seedPacket[j] = G4long(x*LONG_MAX);
 	  doubleCount=true;
 	}
-    
+
     doubleCount = false;
   }
 }
@@ -232,8 +230,8 @@ void MPIManager::DistributeSeeds()
     for(size_t i=0; i<seedPacket.size(); i++)
       G4cout << "Rank[" << i << "] seed = " << seedPacket[i] << G4endl;
   }
-  
-  CLHEP::HepRandom::setTheSeed(seedPacket[rank]); 
+
+  CLHEP::HepRandom::setTheSeed(seedPacket[rank]);
 }
 
 
@@ -241,7 +239,7 @@ void MPIManager::DistributeSeeds()
 // before proceeding. Useful to ensure that nodes are communicating as
 // well as synchronized.
 void MPIManager::ForceBarrier(G4String location)
-{ 
+{
   MPI::COMM_WORLD.Barrier();
 
   G4cout << "\nZK ANNOUNCEMENT: All nodes have reached the MPI barrier at " << location << "!\n"
@@ -252,7 +250,7 @@ void MPIManager::ForceBarrier(G4String location)
 
 // MPI::COMM_WORLD.Reduce reduces values on all nodes to a single
 // value on the specified node by using an MPI predefined operation
-// or a user specified operation. 
+// or a user specified operation.
 
 G4double MPIManager::SumDoublesToMaster(G4double slaveValue)
 {
@@ -268,6 +266,3 @@ G4int MPIManager::SumIntsToMaster(G4int slaveValue)
   MPI::COMM_WORLD.Reduce(&slaveValue, &masterSum, 1, MPI::INT, MPI::SUM, 0);
   return masterSum;
 }
-
-#endif
-

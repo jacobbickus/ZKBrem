@@ -34,8 +34,6 @@ void MPIManagerMessenger::SetNewValue(G4UIcommand *cmd, G4String newValue)
 {
   if(cmd == mpiBeamOnCmd){
     std::istringstream is(newValue);
-
-#ifdef ZK_MPI_ENABLED
     // Parse the command line
 
     // Number of events to process for this run. Note that
@@ -50,14 +48,11 @@ void MPIManagerMessenger::SetNewValue(G4UIcommand *cmd, G4String newValue)
     G4bool distributeBool = true;
 
     is >> eventsToProcess >> distributeString;
-    
+
     if(distributeString=="false")
       distributeBool = false;
-    
+
 
     theMPImanager->BeamOn(eventsToProcess, distributeBool);
-#endif
   }
 }
-
-

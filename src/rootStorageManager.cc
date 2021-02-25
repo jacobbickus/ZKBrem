@@ -4,7 +4,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
 
-// ROOT 
+// ROOT
 #include "TChain.h"
 
 // C++
@@ -38,23 +38,23 @@ rootStorageManager::rootStorageManager(G4bool arch, int iind = 0)
     idealDetEnergy(0.), idealDetWeight(0.), idealDetIndex(0)
 {
   if(theRootStorageManager)
-    G4Exception("rootStorageManager::rootStorageManager()", 
-		"ZKBremRootException001", 
-		FatalException, 
+    G4Exception("rootStorageManager::rootStorageManager()",
+		"ZKBremRootException001",
+		FatalException,
 		"The rootStorageManager was constructed twice!");
   else
     theRootStorageManager = this;
-   
-  // Trackers for detector efficiency measurements 
+
+  // Trackers for detector efficiency measurements
   resetHPGeFlags();
-  
+
   theMessenger = new rootStorageManagerMessenger(this);
 }
-  
+
 rootStorageManager::~rootStorageManager()
 {
   delete ROOTFile;
-  delete theMessenger; 
+  delete theMessenger;
 }
 
 void rootStorageManager::resetHPGeFlags()
@@ -85,21 +85,18 @@ void rootStorageManager::CreateROOTObjects()
 	   <<   "                  initialize a new set until the existing ROOT objects are written to\n"
 	   <<   "                  to disk via the /ZK/root/write command.\n"
 	   << G4endl;
-    
+
     return;
   }
-  
-#ifdef ZK_MPI_ENABLED
   MPIManager *theMPIManager = MPIManager::GetInstance();
   MPI_Rank = theMPIManager->GetRank();
   MPI_Size = theMPIManager->GetSize();
-#endif
 
   GenerateFileNames();
-  
+
   if(ROOTFile) delete ROOTFile;
   ROOTFile = new TFile(ROOTFileName, "recreate");
-  
+
   tree = new TTree("GammaTreeNear","TTree to hold e- bremsstrahlung gamma events at radiator");
   tree->Branch("gammaEnergy", &gammaEnergy);
   tree->Branch("gammaEinit",&gammaEinit);
@@ -146,7 +143,7 @@ void rootStorageManager::CreateROOTObjects()
   lysoTree->Branch("lysoWeight", &lysoWeight);
   lysoTree->Branch("lysoInitE", &lysoInitE);
   lysoTree->Branch("lysoInitA", &lysoInitA);
-  
+
   cdepTree = new TTree("cdepTree","TTree to monitor charge deposition in radiator");
   cdepTree->Branch("cuCharge", &cuCD);
   cdepTree->Branch("auCharge", &auCD);
@@ -185,7 +182,7 @@ void rootStorageManager::CreateROOTObjects()
   idealDetTree->Branch("idealDetEnergy", &idealDetEnergy);
   idealDetTree->Branch("idealDetWeight", &idealDetWeight);
   idealDetTree->Branch("idealDetIndex",  &idealDetIndex);
-  
+
   ROOTObjectsExist = true;
 }
 
@@ -207,9 +204,9 @@ void rootStorageManager::WriteROOTObjects(G4bool EmergencyWrite)
 	   <<   "                   terminates. Please issue the /ZK/root/write command before exiting\n"
 	   <<   "                   ZK to avoid this message.\n"
 	   << G4endl;
-  
+
   if(parallelArchitecture){
-    
+
     tree->Write();
     tree2->Write();
     //theMetadata->Write("theMetadata");
@@ -224,7 +221,7 @@ void rootStorageManager::WriteROOTObjects(G4bool EmergencyWrite)
     ROOTFile->Close();
 
     if(MPI_Rank == 0){
-      
+
       G4String FinalFileName = ROOTFileName.substr(0, ROOTFileName.find(".slave"));
       TFile *FinalFile = new TFile(FinalFileName.c_str(), "update");
       FinalFile->Open(FinalFileName.c_str(), "recreate");
@@ -247,9 +244,9 @@ void rootStorageManager::WriteROOTObjects(G4bool EmergencyWrite)
 
       G4String haddCommand = "hadd -f " + FinalFileName + targets;
       system(haddCommand.c_str());
-      
+
       // FinalFile->Close();
-      
+
       for(it = slaveFileNames.begin(); it != slaveFileNames.end(); it++){
         G4String RemoveSlaveFileCmd = "rm -f " + (*it);
         system(RemoveSlaveFileCmd.c_str());
@@ -270,10 +267,10 @@ void rootStorageManager::WriteROOTObjects(G4bool EmergencyWrite)
     bremIncidentTree->Write();
     idealDetTree->Write();
     //ROOTFile->Close();
-    
+
     ROOTObjectsExist = false;
   }
-}  
+}
 
 
 void rootStorageManager::FillTree(G4double gE, G4double gE0, G4double w, G4double gA,G4double x,G4double y,G4double ivx, G4double ivy, G4double ivz,unsigned int id)
@@ -331,7 +328,7 @@ void rootStorageManager::FillHPGeTree1(unsigned int ind, G4double gE, G4double w
   primary1 = primary[ind];
   indead1 = indead[ind];
   hpgeTree1->Fill();
-  
+
   fHPGe[ind] = true;
 }
 
@@ -342,11 +339,11 @@ void rootStorageManager::FillLYSOTree(G4double gE, G4double w, G4double Ei, G4do
   lysoEnergy = gE;
   lysoWeight = w;
   lysoInitE = Ei;
-  lysoInitA = Ai; 
+  lysoInitA = Ai;
   // vertexEnergy1 = gvE;
   // primary1 = prim;
   lysoTree->Fill();
-  
+
   lysofilled = true;
 }
 
@@ -438,10 +435,10 @@ void rootStorageManager::GenerateFileNames()
   if(ROOTFileName == ""){
     time_t theTime;
     struct tm *timeInfo;
-    
+
     time(&theTime);
     timeInfo = localtime(&theTime);
-    
+
     const int N = 100;
     char buffer[N];
 
@@ -451,7 +448,7 @@ void rootStorageManager::GenerateFileNames()
       ss << buffer << ".root.slave" << MPI_Rank;
     else
       ss << buffer << ".root";
-    
+
     ROOTFileName = ss.str();
 
     if (find>0)
@@ -462,7 +459,7 @@ void rootStorageManager::GenerateFileNames()
       ROOTFileName = fname;
 
     }
-    
+
   }
   else{
     if(parallelArchitecture){
@@ -477,14 +474,14 @@ void rootStorageManager::GenerateFileNames()
   // names are cleared at every time CreateROOTObjects() is called in
   // order to enable multiple ROOT files to be written for many runs
   // within a single ZK session
-  
+
   if(MPI_Rank == 0){
     if(parallelArchitecture){
 
       slaveFileNames.clear();
 
       for(int rank=0; rank<MPI_Size; rank++){
-	
+
 	size_t pos = ROOTFileName.find("slave");
 	if(pos != G4String::npos){
 	  ss.str("");
@@ -504,14 +501,10 @@ void rootStorageManager::GenerateFileNames()
 
 void rootStorageManager::ReduceSlaveValuesToMaster()
 {
-#ifdef ZK_MPI_ENABLED
-  
+
   G4cout << "\nZK ANNOUNCEMENT: Beginning the MPI reduction of data to the master!"
 	 << G4endl;
 
-  // MPIManager *theMPImanager = MPIManager::GetInstance();
-
   G4cout << "\nZK ANNOUNCEMENT: Finished the MPI reduction of values to the master!\n"
 	 << G4endl;
-#endif
 }

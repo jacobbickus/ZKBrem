@@ -39,17 +39,16 @@ class MPIManagerMessenger;
 
 class MPIManager
 {
-#ifdef ZK_MPI_ENABLED
 public:
   MPIManager(int, char **);
   ~MPIManager();
 
   // Static method to obtain the singleton MPI manager
   static MPIManager *GetInstance();
-  
+
   // Method to run the beam used by MPImessenger
   void BeamOn(G4double, G4bool);
-  
+
   // Methods to create and distribute seeds to nodes
   void CreateSeeds();
   void DistributeSeeds();
@@ -90,13 +89,12 @@ private:
   G4bool isMaster, isSlave;
   enum {RANK_MASTER, RANK_SLAVE};
   std::ofstream slaveOut;
-  
+
   G4double totalEvents;
   G4long masterEvents, slaveEvents;
   G4bool distributeEvents;
 
   std::vector<G4long> seedPacket;
-#endif
 };
 
 #endif

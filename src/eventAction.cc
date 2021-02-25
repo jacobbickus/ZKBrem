@@ -6,9 +6,7 @@
 
 #include <ctime>
 
-#ifdef ZK_MPI_ENABLED
 #include "MPIManager.hh"
-#endif
 
 #include "eventAction.hh"
 #include "rootStorageManager.hh"
@@ -16,8 +14,8 @@
 eventAction::eventAction()
   : eventInfoFreq(100000), runID(0),
     runTime(0.), prevRunTime(0.), eventsPerSec(0.), totalEventsToRun(0.), timeToFinish(0.)
-{ 
-  EventActionMessenger = new eventActionMessenger(this); 
+{
+  EventActionMessenger = new eventActionMessenger(this);
 }
 
 
@@ -32,16 +30,16 @@ void eventAction::BeginOfEventAction(const G4Event *currentEvent)
   if(event==0){
     G4cout << "\n\n"
 	   << "\n***************************************************************************\n"
-	   <<   "****  ZK STATUS: Tracking Events!  ****************************************\n***" 
+	   <<   "****  ZK STATUS: Tracking Events!  ****************************************\n***"
 	   << G4endl;
 
-    totalEventsToRun = 
+    totalEventsToRun =
       G4RunManager::GetRunManager()->GetCurrentRun()->GetNumberOfEventToBeProcessed();
   }
   else if(event % eventInfoFreq == 0){
-    
+
     G4RunManager *runMgr = G4RunManager::GetRunManager();
-    
+
     // Account for the fact that the process clock runs continously
     // across successive runs by subtracting the previous run time
     // from the total process time to get the current run time
@@ -49,13 +47,13 @@ void eventAction::BeginOfEventAction(const G4Event *currentEvent)
       prevRunTime = clock()*1.0/CLOCKS_PER_SEC;
       runID++;
     }
-    
+
     // Calculate the rate [particles tracked / s] and the estimated
     // time to completion of the present run [m,s]
     runTime = clock()*1.0/CLOCKS_PER_SEC - prevRunTime;
     eventsPerSec = event*1.0/runTime;  // [s]
     timeToFinish = (totalEventsToRun-event)/eventsPerSec; // [s]
-    
+
     // Output the event variables in scientific notation using
     // std::stringstreams to avoid screwing up G4cout formatting
     std::stringstream eventSS;
@@ -68,12 +66,12 @@ void eventAction::BeginOfEventAction(const G4Event *currentEvent)
 
     G4cout << "\r**  Event [" << eventSS.str() << "/" << tEventSS.str() << "]    "
 	   << std::setprecision(4)
-	   << "Rate [" << eventsPerSec << "]    " 
+	   << "Rate [" << eventsPerSec << "]    "
 	   << std::setprecision(2)
-	   << "Time2Finish [" 
-	   << ((int)timeToFinish)/3600  << "h " 
-	   << ((int)timeToFinish%3600)/60 << "m " 
-	   << ((int)timeToFinish%3600)%60 << "s]" 
+	   << "Time2Finish ["
+	   << ((int)timeToFinish)/3600  << "h "
+	   << ((int)timeToFinish%3600)/60 << "m "
+	   << ((int)timeToFinish%3600)%60 << "s]"
 	   << std::setprecision(6) << std::flush;
   }
 }
@@ -90,7 +88,7 @@ void eventAction::EndOfEventAction(const G4Event * eve)
   G4THitsMap<G4double>* steelHC = static_cast<G4THitsMap<G4double>*>(eve->GetHCofThisEvent()->GetHC(steelID));
   G4int junkID = G4SDManager::GetSDMpointer()->GetCollectionID("junkScore/junkChargeDep");
   G4THitsMap<G4double>* junkHC = static_cast<G4THitsMap<G4double>*>(eve->GetHCofThisEvent()->GetHC(junkID));
-  
+
   double screwTotal = 0.0;
   for (unsigned int j=0; j<4; j++)
   {
@@ -103,12 +101,12 @@ void eventAction::EndOfEventAction(const G4Event * eve)
       screwTotal += SumHC(sHC);
     }
   }
-  
+
   double cuS = SumHC(cuHC);
   double auS = SumHC(auHC);
   if (junkID>=0)
     auS += SumHC(junkHC);
-    
+
   double stS = SumHC(steelHC)+screwTotal;
   // G4cout<<SumHC(steelHC)<<" "<<screwTotal<<"\n";
   double ppS = 0;
@@ -118,12 +116,12 @@ void eventAction::EndOfEventAction(const G4Event * eve)
     G4THitsMap<G4double>* pipeHC = static_cast<G4THitsMap<G4double>*>(eve->GetHCofThisEvent()->GetHC(pipeID));
     ppS = SumHC(pipeHC);
   }
-  
+
   //rootStorageManager::GetInstance()->FillcdepTree(cuS,auS,stS,ppS);
-      
+
   // Reset detector pass through flags
   rootStorageManager::GetInstance()->resetHPGeFlags();
-  
+
 }
 
 G4double eventAction::SumHC(G4THitsMap<G4double>* hitsMap) const
