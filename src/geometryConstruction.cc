@@ -67,7 +67,7 @@ geometryConstruction::geometryConstruction(G4int ilysoconf, G4int iplateconf, G4
   Ti = NISTMgr->FindOrBuildMaterial("G4_Ti");
 
   U = NISTMgr->FindOrBuildMaterial("G4_U");
-  
+
   Lu = NISTMgr->FindOrBuildMaterial("G4_Lu");
   Y = NISTMgr->FindOrBuildMaterial("G4_Y");
   Ce = NISTMgr->FindOrBuildMaterial("G4_Ce");
@@ -193,7 +193,7 @@ geometryConstruction::geometryConstruction(G4int ilysoconf, G4int iplateconf, G4
 
   hpgeSD_2 = new sensitiveDetector("hpgeSD_2");
   SDMan->AddNewDetector(hpgeSD_2);
-  
+
   hpgeSD_3 = new sensitiveDetector("hpgeSD_3");
   SDMan->AddNewDetector(hpgeSD_3);
 
@@ -221,7 +221,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   // ------------------------------------------------------------------------------------
   // The world volume
   //
-  
+
   const G4double inch = 25.4; // one inch in (Geant4 default) mm, because lead bricks are 2x4x8"
 
   // distances from center of radiator to floor, ceiling
@@ -248,24 +248,24 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   G4double worldY = hallY + 2.0*wall_thickness;
   G4double worldZ = hallZ + 2.0*wall_thickness;
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(worldZ);
-  
+
   /*world_S = new G4Box("world_S", worldX/2, worldY/2, worldZ/2);
-  
-  world_L = new G4LogicalVolume(world_S, 
-        Concrete, 
+
+  world_L = new G4LogicalVolume(world_S,
+        Concrete,
         "world_L");
-  
-  world_P = new G4PVPlacement(0, 
-            G4ThreeVector(), 
-            world_L, 
+
+  world_P = new G4PVPlacement(0,
+            G4ThreeVector(),
+            world_L,
             "TheWorld",
             0,
             false,
             0);*/
-  
+
   G4VisAttributes *worldVisAtt = new G4VisAttributes();
   worldVisAtt->SetVisibility(false);
-  
+
   hall_S = new G4Box("hall_S", hallX/2.0, hallY/2.0, hallZ/2.0);
 
   G4Material * worldmat = Air;
@@ -280,7 +280,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
 
   // ------------------------------------------------------------------------------------
   // The bremsstrahlung target
-  // 
+  //
   bool oldgeo =  false; // Reimplementing the radiator geometry from scractch
                         // based on the measurements made at HVRL on 1-25-2017.
                         // Use "oldgeo" to get the old configuration.
@@ -288,23 +288,23 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   G4double CuX = 100.*mm; // Variables needed elsewhere
   G4double CuY = 100.*mm;
   G4double CuZ = 20.1*mm;
-         
+
   if (oldgeo)
   {
     // Cu backing
     // all the radiator geometry is contained by the copper, so use it as mother volume
-    
+
     // keep the radiator centered for now, since it's easier
     G4double radPosX = 0.0; //-worldX/2.0 + rad_to_right;
     G4double radPosY = 0.0; //-worldY/2.0 + rad_to_floor;
     G4double radPosZ = 0.0; //-worldZ/2.0 + rad_to_back;
 
     Cu_S = new G4Box("Cu_S", CuX/2.0, CuY/2.0, CuZ/2.0);
-    
+
     Cu_L = new G4LogicalVolume(Cu_S,
            Cu,
            "Cu_L");
-    
+
     Cu_P = new G4PVPlacement(0,
                G4ThreeVector(radPosX,radPosY,radPosZ),
                Cu_L,
@@ -312,30 +312,30 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                hall_L,
                false,
                0);
-    
-    G4VisAttributes *CuVisAtt = new G4VisAttributes(G4Color(184./256, 
-                      115./256, 
+
+    G4VisAttributes *CuVisAtt = new G4VisAttributes(G4Color(184./256,
+                      115./256,
                       51./256,
                       1.0));
     CuVisAtt->SetForceSolid(false);
     Cu_L->SetVisAttributes(CuVisAtt);
-    
+
      // Au disk  - 1 cm diameter, 102 um thickness
-    
+
     G4double AuInR = 0.*mm;
     G4double AuOutR = 5.0*mm;
     G4double AuZ = 0.102*mm;
     G4double AuStartAng = 0.*degree;
     G4double AuSpanAng = 360.*degree;
-    
+
     G4double AuPosZ = -(AuZ/2.0);
-    
-    G4Tubs * Au_S = new G4Tubs("Au_S", AuInR, AuOutR, AuZ/2.0, AuStartAng, AuSpanAng); 
-    
+
+    G4Tubs * Au_S = new G4Tubs("Au_S", AuInR, AuOutR, AuZ/2.0, AuStartAng, AuSpanAng);
+
     Au_L = new G4LogicalVolume(Au_S,
            Au,
            "Au_L");
-    
+
     Au_P = new G4PVPlacement(0,
                G4ThreeVector(0., 0., AuPosZ),
                Au_L,
@@ -343,30 +343,30 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                Cu_L,
                false,
                0);
-    
-    G4VisAttributes *AuVisAtt = new G4VisAttributes(G4Color(243./256, 
-                      214./256, 
+
+    G4VisAttributes *AuVisAtt = new G4VisAttributes(G4Color(243./256,
+                      214./256,
                       26./256,
                       1.0));
     AuVisAtt->SetForceSolid(false);
     Au_L->SetVisAttributes(AuVisAtt);
-    
+
     // steel plate in front of gold layer - 4 cm diameter, 1 cm thickness
-    
+
     G4double ssInR = 0.*mm;
     G4double ssOutR = 30.*mm;
     G4double ssZ = (CuZ/2-AuZ)*mm;
     G4double ssStartAng = 0.*degree;
     G4double ssSpanAng = 360.*degree;
-    
+
     G4double ssPosZ = -(AuZ+ssZ/2.0)*mm;
-    
-    ss_S = new G4Tubs("ss_S", ssInR, ssOutR, ssZ/2.0, ssStartAng, ssSpanAng); 
-    
+
+    ss_S = new G4Tubs("ss_S", ssInR, ssOutR, ssZ/2.0, ssStartAng, ssSpanAng);
+
     ss_L = new G4LogicalVolume(ss_S,
            StainlessSteel,
            "ss_L");
-    
+
     ss_P = new G4PVPlacement(0,
                G4ThreeVector(0., 0., ssPosZ),
                ss_L,
@@ -374,16 +374,16 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                Cu_L,
                false,
                0);
-    
-    G4VisAttributes *ssVisAtt = new G4VisAttributes(G4Color(115./256, 
-                      115./256, 
+
+    G4VisAttributes *ssVisAtt = new G4VisAttributes(G4Color(115./256,
+                      115./256,
                       115./256,
                       0.5));
     ssVisAtt->SetForceSolid(false);
     ss_L->SetVisAttributes(ssVisAtt);
 
     // truncated cone hole inside stainless steel plate
-    
+
     G4double  coneRmin1 = 0.*mm;
     G4double  coneRmax1 = 10.*mm;
     G4double  coneRmin2 = 0.*mm;
@@ -393,13 +393,13 @@ G4VPhysicalVolume * geometryConstruction::Construct()
     G4double  coneDPhi = 360.*degree;
 
     //G4double conePosZ = -(AuZ+coneZ/2.0)*mm;
-    
-    cone_S = new G4Cons("cone_S", coneRmin1, coneRmax1, coneRmin2, coneRmax2, coneZ/2.0, coneSPhi, coneDPhi); 
-    
+
+    cone_S = new G4Cons("cone_S", coneRmin1, coneRmax1, coneRmin2, coneRmax2, coneZ/2.0, coneSPhi, coneDPhi);
+
     cone_L = new G4LogicalVolume(cone_S,
            Vacuum,
            "cone_L");
-    
+
     cone_P = new G4PVPlacement(0,
                G4ThreeVector(0., 0., 0.),
                cone_L,
@@ -411,11 +411,11 @@ G4VPhysicalVolume * geometryConstruction::Construct()
     cone_L->SetVisAttributes(ssVisAtt);
   }
   else // Redone radiator geometry
-  {  
-  
+  {
+
     // Main Cu block with recesses of vacuum, implemented via booleans since the
-    // foil mount disc extrudes from the recess, making containing solids a pain    
-    
+    // foil mount disc extrudes from the recess, making containing solids a pain
+
     CuX = 120.65*mm;
     CuY = 120.65*mm;
     CuZ = 25.4*mm;
@@ -426,36 +426,36 @@ G4VPhysicalVolume * geometryConstruction::Construct()
     G4double radPosZ = 0.0; //-worldZ/2.0 + rad_to_back;
 
     Cu_S = new G4Box("Cu_S", CuX/2.0, CuY/2.0, CuZ/2.0);
-               
+
     // Wide/shallow recess
     G4double drec1 = 52.3*mm;
     G4double hrec1 = 2.48*mm;
-        
+
     G4Tubs * rec1_S = new G4Tubs("Recess1_S", 0.0, drec1/2.0, hrec1/2.0, 0.0, 2.0*M_PI);
     G4SubtractionSolid * Cu1_S = new G4SubtractionSolid("CuCut1",Cu_S,rec1_S,0,G4ThreeVector(0,0,-CuZ/2+hrec1/2.0));
-    
-                                
+
+
     // Deep, post-foil recess
     G4double drec2 = 11.05*mm;
     G4double hrec2 = 12.7*mm;
-        
+
     G4Tubs * rec2_S = new G4Tubs("Recess2_S", 0.0, drec2/2.0, hrec2/2.0, 0.0, 2.0*M_PI);
     G4SubtractionSolid * Cu2_S = new G4SubtractionSolid("CuCut2",Cu1_S,rec2_S,0,G4ThreeVector(0,0,-CuZ/2+hrec1+hrec2/2.0));
-    
+
     // Pressure balance channel
     G4Tubs * rec3_S = new G4Tubs("Recess3_S", 0.0, 2*mm/2.0, (16.4*mm*2+drec2)/2.0, 0.0, 2.0*M_PI);
     G4RotationMatrix * chanrot = new G4RotationMatrix(); chanrot->rotateY(M_PI/2.0);
     G4SubtractionSolid * Cu3_S = new G4SubtractionSolid("CuCut3",Cu2_S,rec3_S,chanrot,G4ThreeVector(0,0,-CuZ/2+hrec1));
-                                   
+
     Cu_L = new G4LogicalVolume(Cu3_S,Cu,"Cu_L");
-    
+
     // Use these dimensions to create a vacuum volume to contain the entirety of
     // the radiator apparatus and represent the inside of the beam pipe
     G4Tubs * beamvac_S = new G4Tubs("beamVacuum_S",0.0,drec1/2.0,20*cm,0,2.0*M_PI);
     G4UnionSolid * allvac_S = new G4UnionSolid("vacuum_S",Cu_S,beamvac_S,0,G4ThreeVector(0,0,-CuZ/2-20*cm));
-    
+
     G4LogicalVolume * allvac_L =  new G4LogicalVolume(allvac_S,Vacuum,"allvac_L");
-    
+
     vac_P = new G4PVPlacement(0,
            G4ThreeVector(radPosX,radPosY,radPosZ),
            allvac_L,
@@ -463,7 +463,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
            hall_L,
            false,
            0);
-    
+
     Cu_P = new G4PVPlacement(0,
                G4ThreeVector(0,0,0),
                Cu_L,
@@ -471,15 +471,15 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                allvac_L,
                false,
                0);
-               
+
     // Gold foil
     G4double AuThickness = 0.126*mm;
-    G4Box * Au_S = new G4Box("Au_S", 3.0/4.0*inch/2.0, 3.0/4.0*inch/2.0, AuThickness/2.0); 
-    
+    G4Box * Au_S = new G4Box("Au_S", 3.0/4.0*inch/2.0, 3.0/4.0*inch/2.0, AuThickness/2.0);
+
     Au_L = new G4LogicalVolume(Au_S,Au,"Au_L");
-           
+
     double AuPosZ = -CuZ/2+hrec1-AuThickness/2;
-    
+
     Au_P = new G4PVPlacement(0,
                G4ThreeVector(0., 0., AuPosZ),
                Au_L,
@@ -487,8 +487,8 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                allvac_L,
                false,
                0);
-               
-    // Deposited metal vapor on Au surface   
+
+    // Deposited metal vapor on Au surface
     double junkT = 0.3*mm;
     G4Tubs * junk_S = new G4Tubs("junk_S", 0.0, 9.5*mm/2.0, junkT/2.0, 0.0, 2.0*M_PI);
     junk_L = new G4LogicalVolume(junk_S,StainlessSteel,"junk_L");
@@ -499,8 +499,8 @@ G4VPhysicalVolume * geometryConstruction::Construct()
 //                                   allvac_L,
 //                                   false,
 //                                   0);
-               
-     
+
+
     // Conical-hole disk foil holder thing (will still be called "ss_L", etc.
     // for the charge counter, even though we found out it's actually made of
     // copper)
@@ -510,7 +510,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
     G4SubtractionSolid * disk1_S = new G4SubtractionSolid("disk1_S",disk_S,dbore1_S,0,G4ThreeVector(0,0,0));
     cone_S = new G4Cons("cone_S", 0.0, 18.0*mm/2.0, 0.0, 10.0*mm/2.0, (diskh-1.0*mm)/2.0, 0.0, 2.0*M_PI);
     G4SubtractionSolid * disk2_S = new G4SubtractionSolid("disk2_S",disk1_S,cone_S,0,G4ThreeVector(0,0,-diskh/2.0+(diskh-1.0*mm)/2.0));
-    
+
     ss_L = new G4LogicalVolume(disk2_S,Cu,"ss_L");
     ss_P = new G4PVPlacement(0,
            G4ThreeVector(0., 0., AuPosZ-AuThickness/2-diskh/2),
@@ -519,7 +519,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
            allvac_L,
            false,
            0);
-           
+
     // Disk mount screws
     G4Tubs * screw_S = new G4Tubs("screw_S", 0.0, 4.0*mm/2.0, 3.0*mm/2.0, 0.0, 2.0*M_PI);
     double screwx[4] = {9.23*mm,9.23*mm,-9.23*mm,-9.23*mm};
@@ -538,7 +538,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                         false,
                         0);
     }
-    
+
     // Beam pipe section in electrical contact
     G4Tubs * beampipe_S = new G4Tubs("beampipe_out_S", drec1/2.0,drec1/2.0+3*mm, 2*inch/2, 0, 2.0*M_PI);
     beampipe_L = new G4LogicalVolume(beampipe_S, StainlessSteel, "beampipe_L");
@@ -550,7 +550,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                                false,
                                0);
   }
-  
+
   // Charge accumulation scorers for the metal radiator components
   G4MultiFunctionalDetector * cuScore = new G4MultiFunctionalDetector("cuScore");
   G4MultiFunctionalDetector * auScore = new G4MultiFunctionalDetector("auScore");
@@ -569,10 +569,10 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   G4SDManager::GetSDMpointer()->AddNewDetector(junkScore);
   G4VPrimitiveScorer * junkChargeDep = new G4PSCellCharge("junkChargeDep");
   junkScore->RegisterPrimitive(junkChargeDep);
-    
+
   if (junk_L)
-    junk_L->SetSensitiveDetector(junkScore); 
-  
+    junk_L->SetSensitiveDetector(junkScore);
+
   if (!oldgeo)
   {
     for (unsigned int j=0; j<4; j++)
@@ -586,19 +586,19 @@ G4VPhysicalVolume * geometryConstruction::Construct()
         screwScore->RegisterPrimitive(screwChargeDep);
         screw_L[j]->SetSensitiveDetector(screwScore);
     }
-    
+
     G4MultiFunctionalDetector * pipeScore = new G4MultiFunctionalDetector("pipeScore");
     G4SDManager::GetSDMpointer()->AddNewDetector(pipeScore);
     G4VPrimitiveScorer * pipeChargeDep = new G4PSCellCharge("pipeChargeDep");
     pipeScore->RegisterPrimitive(pipeChargeDep);
     beampipe_L->SetSensitiveDetector(pipeScore);
-    
+
   }
-  
-  Cu_L->SetSensitiveDetector(cuScore);  
+
+  Cu_L->SetSensitiveDetector(cuScore);
   Au_L->SetSensitiveDetector(auScore);
   ss_L->SetSensitiveDetector(steelScore);
-  
+
   const bool testbool = true;
   if (testbool){
   // ------------------------------------------------------------------------------------
@@ -615,7 +615,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   G4double   rad_to_far_shield = 97.0*cm; // z distance from radiator front to center of far assembly
   G4double plane_to_far_shield =  2.0*cm; // y distance from beam plane to center height of far assembly
   G4double  beam_to_far_shield = 44.0*cm; // x distance from radiator center to center of far assembly at outer shield edge
-  
+
   G4double rad_to_lyso = 63*inch + 1007.9; // Distance from radiator to LYSO crystal (not the same for all runs, distance was measured from plate)
   if (lysoconf == 0 ) rad_to_lyso = 96*inch + 1007.9;
   if (lysoconf == 3 ) rad_to_lyso = 143*inch - 2.43 + 11.0; // April 2017
@@ -630,14 +630,14 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   if (lysoconf<4)
   {
     G4double lysoX = 4.0*mm;
-    G4double lysoY = 4.0*mm;  
-    
+    G4double lysoY = 4.0*mm;
+
     lyso_S = new G4Box("lyso_S", lysoX/2.0, lysoY/2.0, lysoZ/2.0);
-    
+
     lyso_L = new G4LogicalVolume(lyso_S,
 				   LYSO,
 				   "lyso_L");
-    
+
     lyso_P = new G4PVPlacement(0,
 			         G4ThreeVector(0., 0., lysoPosZ),
 			         lyso_L,
@@ -645,13 +645,13 @@ G4VPhysicalVolume * geometryConstruction::Construct()
 			         hall_L,
 			         false,
 			         0);
-    
-    G4VisAttributes *lysoVisAtt = new G4VisAttributes(G4Color(184./256, 
-							      115./256, 
+
+    G4VisAttributes *lysoVisAtt = new G4VisAttributes(G4Color(184./256,
+							      115./256,
 							      51./256,
 							      1.0));
     lysoVisAtt->SetForceSolid(true);
-    
+
     lyso_L->SetSensitiveDetector(lysoSD);
   }
   else
@@ -659,11 +659,11 @@ G4VPhysicalVolume * geometryConstruction::Construct()
     lysoZ = 1.5*inch;
 
     G4Tubs * LaBr3_S = new G4Tubs("LaBr3_S", 0.0, 1.5*inch/2.0, 1.5*inch/2.0, 0, 2*M_PI);
-    
+
     lyso_L = new G4LogicalVolume(LaBr3_S,
 				   LaBr3,
 				   "LaBr3_L");
-    
+
     lyso_P = new G4PVPlacement(0,
 			         G4ThreeVector(0., 0., lysoPosZ),
 			         lyso_L,
@@ -671,13 +671,13 @@ G4VPhysicalVolume * geometryConstruction::Construct()
 			         hall_L,
 			         false,
 			         0);
-    
-    G4VisAttributes *lysoVisAtt = new G4VisAttributes(G4Color(184./256, 
-							      115./256, 
+
+    G4VisAttributes *lysoVisAtt = new G4VisAttributes(G4Color(184./256,
+							      115./256,
 							      51./256,
 							      1.0));
     lysoVisAtt->SetForceSolid(true);
-    
+
     lyso_L->SetSensitiveDetector(lysoSD);
   }
 
@@ -884,9 +884,9 @@ G4VPhysicalVolume * geometryConstruction::Construct()
     det1x_actual = det1x_actual + det1_displacement * cos(relative_angle);
     det1y_actual = det1y_actual;
     det1z_actual = det1z_actual - det1_displacement * sin(relative_angle);
-    
+
   }
-  
+
   std::cout<<"\n\nDetector 1 box: "<<det1x_actual<<" "<<det1y_actual<<" "<<det1z_actual<<"\n\n";
 
   G4ThreeVector pos1(det1x_actual-6.3*sin(relative_angle)-5.0*cos(relative_angle) + 3.0*inch*cos(relative_angle), det1y_actual-6.3, det1z_actual- 6.3*cos(relative_angle) + 5.0*sin(relative_angle) -3.0*inch*sin(relative_angle));
@@ -993,7 +993,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                                                 hall_L,
                                                 false,
                                                 0);
-                                                
+
   // Beam pipe (also redone when radiator geometry was changed)
   if (oldgeo)
   {
@@ -1014,9 +1014,9 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                                                "Beampipe",
                                                hall_L,
                                                false,
-                                               0);                
-  }                            
-  
+                                               0);
+  }
+
   // lead shielding below the radiator
   G4Box *lead_below_radiator_S = new G4Box("lead_below_radiator_S", 5*lead_brick_4in/2.0, 2*lead_brick_2in/2.0, 4*lead_brick_4in/2.0);
   G4LogicalVolume *lead_below_radiator_L = new G4LogicalVolume(lead_below_radiator_S, Pb, "lead_below_radiator_L");
@@ -1107,13 +1107,11 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   // conical lead collimator: a 4x4x8" lead brick with 1/2" and 2" diameter openings
   // can be placed as close as ~3/4" from the radiator face due to the ionization chamber
   G4Box *collimator_lead_S = new G4Box("collimator_lead_S", lead_brick_4in/2.0, lead_brick_4in/2.0, lead_brick_8in/2.0);
-  
+
 
   G4double collimator_lead_x = 0.0;
   G4double collimator_lead_y = 0.0;
   collimator_lead_z = CuZ/2+3.0+lead_brick_8in/2.0;//0.75*inch + lead_brick_8in/2.0;
-
-  G4cout<<"\n\nUpos: "<<collimator_lead_z+4*inch+780<<" mm";
 
   // conical hole in the lead
   G4double collimator_hole_r1 = 9.86/2.0; // Entry
@@ -1121,11 +1119,11 @@ G4VPhysicalVolume * geometryConstruction::Construct()
 
   G4double collimator_hole_h = lead_brick_8in+0.1;
   G4Cons * collimator_hole_S = new G4Cons("collimator_hole_S", 0.0, collimator_hole_r1, 0.0, collimator_hole_r2, collimator_hole_h/2.0, 0, 2.0*M_PI);
-  
+
   G4SubtractionSolid * collimator_S = new G4SubtractionSolid("collimator_S",collimator_lead_S,collimator_hole_S,0,G4ThreeVector(0,0,0));
-  
+
   G4LogicalVolume *collimator_lead_L = new G4LogicalVolume(collimator_S, Pb, "collimator_lead_L");
-  
+
 //  G4LogicalVolume *collimator_hole_L = new G4LogicalVolume(collimator_hole_S, Air, "collimator_hole_L");
 
 //  G4PVPlacement *collimator_hole_P = new G4PVPlacement(0,
@@ -1598,7 +1596,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                                                   0);
 
 
-  G4cout<<"\n\n"<<G4ThreeVector(downbeam_lead_det1_x, downbeam_lead_det1_y, downbeam_lead_det1_z)<<" "<<G4ThreeVector(upbeam_lead_det1_x, upbeam_lead_det1_y, upbeam_lead_det1_z)<<"\n\n";
+  //G4cout<<"\n\n"<<G4ThreeVector(downbeam_lead_det1_x, downbeam_lead_det1_y, downbeam_lead_det1_z)<<" "<<G4ThreeVector(upbeam_lead_det1_x, upbeam_lead_det1_y, upbeam_lead_det1_z)<<"\n\n";
 
 
   // lead roof on detector 1 housing; there is at least 8x4x16" of lead everywhere, and more in some places
@@ -1679,7 +1677,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   //giant_lead_shield_L->SetVisAttributes(GiantLeadShieldVisAtt);
   //lead_layer_L->SetVisAttributes(GiantLeadShieldVisAtt);
 
-  
+
   // it might be useful to put some lead in the beamline (post-target) to clean up some scatters off the far wall
   G4Box *lead_beamdump_S = new G4Box("lead_beamdump_S", 2.0*lead_brick_8in/2.0, 8.0*lead_brick_2in/2.0, lead_brick_4in/2.0);
   G4LogicalVolume *lead_beamdump_L = new G4LogicalVolume(lead_beamdump_S, Pb, "lead_beamdump_L");
@@ -1698,7 +1696,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   // for now, put them flush with the shielding behind the radiator
   G4Box *collimator_side_shield_S = new G4Box("collimator_side_shield_S", lead_brick_4in/2.0, 4*lead_brick_2in/2.0, lead_brick_8in/2.0);
   G4Box *collimator_side_shield1_S = new G4Box("collimator_side_shield_S", lead_brick_4in/2.0, lead_brick_8in/2.0, lead_brick_2in/2.0);
-  
+
   G4LogicalVolume *collimator_shield_right_L = new G4LogicalVolume(collimator_side_shield_S, Pb, "collimator_shield_right_L");
   G4LogicalVolume *collimator_shield_left_L = new G4LogicalVolume(collimator_side_shield_S, Pb, "collimator_shield_left_L");
   G4LogicalVolume *collimator_shield1_right_L = new G4LogicalVolume(collimator_side_shield1_S, Pb, "collimator_shield_right1_L");
@@ -1726,7 +1724,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
                                                   hall_L,
                                                   false,
                                                   0);
-                                                  
+
   G4PVPlacement *collimator_shield1_right_P = new G4PVPlacement(0,
                                                   G4ThreeVector(collimator_side_shield_xr+15*mm, collimator_side_shield_y, collimator_side_shield_z-5.0*inch),
                                                   collimator_shield1_right_L,
@@ -1796,7 +1794,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   }
 
 
-  G4cout<<"\n\nExtra filter pos: "<<G4ThreeVector(extra_filter_x, extra_filter_y, extra_filter_z)<<"\n\n";
+  //G4cout<<"\n\nExtra filter pos: "<<G4ThreeVector(extra_filter_x, extra_filter_y, extra_filter_z)<<"\n\n";
 
 
   // lead cylinder behind detector 1
@@ -1898,13 +1896,13 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   G4double U_plate_length = 6.0*inch*plateext;
   G4double U_plate_width  = 6.0*inch*plateext; // approximately
   G4double U_plate_thickness = platethick; // thinnest DU plate we have is 1/32"
-  G4cout<<"Platethick: "<<platethick<<"\n\n";
+  //G4cout<<"Platethick: "<<platethick<<"\n\n";
 
   G4Box *U_plate_S = new G4Box("U_plate_S", U_plate_width/2.0, U_plate_length/2.0, U_plate_thickness/2.0);
   G4LogicalVolume *U_plate_L = new G4LogicalVolume(U_plate_S, platemat, "U_plate_L");
 
   U_plate_z = 998.9; // det1z_actual + det1x_actual * tan(relative_angle);
-  
+
   if (plateconf<4)
   {
     std::cout<<"\n\nPlacing U plate at "<<U_plate_z<<"\n\n";
@@ -1932,7 +1930,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
     G4LogicalVolume *Al_plate_L = new G4LogicalVolume(Al_plate_S, platemat, "Al_plate_L");
 
     U_plate_z = 1060.15; // det1z_actual + det1x_actual * tan(relative_angle);
-    
+
 
     std::cout<<"\n\nPlacing Al plate at "<<U_plate_z<<"\n\n";
     // exit(0);
@@ -1962,7 +1960,7 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   G4LogicalVolume *F_plate_L = new G4LogicalVolume(F_plate_S, Air, "F_plate_L");
   G4LogicalVolume *N_plate_L = new G4LogicalVolume(N_plate_S, Air, "N_plate_L");
 
-  G4cout<<"\n\nFalse near: "<<collimator_lead_z-4.0*inch-1.5*mm<<"\n\n";
+  //G4cout<<"\n\nFalse near: "<<collimator_lead_z-4.0*inch-1.5*mm<<"\n\n";
 
   if (incfalsedets)
   {
@@ -2089,30 +2087,30 @@ G4VPhysicalVolume * geometryConstruction::Construct()
   //
   double mTarget = 0.0;
   G4PhysicalVolumeStore *PVStore = G4PhysicalVolumeStore::GetInstance();
-  G4cout << G4endl;
-  G4cout << "List of physical volumes: " << G4endl;
+  //G4cout << G4endl;
+  //G4cout << "List of physical volumes: " << G4endl;
   for (size_t i = 0; i < PVStore->size(); ++i)
   {
     G4VPhysicalVolume *pv = (*PVStore)[i];
-    G4cout << "  " << pv->GetName() << " (" << pv->GetLogicalVolume()->GetMaterial()->GetName() << ")" << G4endl;
+    //G4cout << "  " << pv->GetName() << " (" << pv->GetLogicalVolume()->GetMaterial()->GetName() << ")" << G4endl;
     if (pv->GetName().contains("TargetLayer"))
       mTarget += pv->GetLogicalVolume()->GetMass();
   }
-  G4cout << G4endl;
-  G4cout << "Target mass = " << mTarget/kg << " kg." << G4endl;
-  G4cout << G4endl;
+  //G4cout << G4endl;
+  //G4cout << "Target mass = " << mTarget/kg << " kg." << G4endl;
+  //G4cout << G4endl;
 
 //  G4GDMLParser * parser = new G4GDMLParser();
 //  parser->Write("ZKBrem1.gdml",hall_L);
 //  exit(-9);
-  
+
   return hall_P;
 }
 
 
 void geometryConstruction::BuildTarget(G4String name, vector<G4Material*> v_mats, vector<double> v_thickness, double width, double length, G4String opt)
 {
-  if (opt != "D" && opt != "X" && opt != "S") {G4cout << "bad opt " << opt << ". Aborting..." << G4endl; exit(1);}
+  if (opt != "D" && opt != "X" && opt != "S") {//G4cout << "bad opt " << opt << ". Aborting..." << G4endl; exit(1);}
 
   const size_t nLayers = v_thickness.size();
   vector< G4Box* > v_boxes;
@@ -2182,7 +2180,7 @@ void geometryConstruction::BuildTarget(G4String name, vector<G4Material*> v_mats
 
 G4LogicalVolume * geometryConstruction::BuildHPGe(unsigned int ind, G4ThreeVector pos, G4RotationMatrix * rot, double gA, double gB, double gC, double gD, double gE, double gF, double gG, double gH, double gI, double gJ, double gK, double gL, double gM, double gN)
 {
-  G4cout<<"\n\nBuilding detector "<<ind<<"...\n";
+  //G4cout<<"\n\nBuilding detector "<<ind<<"...\n";
 
   char buff[128];
   sprintf(buff,"%d",ind);
@@ -2314,13 +2312,12 @@ G4LogicalVolume * geometryConstruction::BuildHPGe(unsigned int ind, G4ThreeVecto
                                                     false,
                                                     0);
 
-  G4cout<<"Detector "<<ind<<" complete.\n\n";
+  //G4cout<<"Detector "<<ind<<" complete.\n\n";
 
   G4ThreeVector foilToDetRay = pos + HPGe_crystal_1_P->GetTranslation() - G4ThreeVector(0,0,U_plate_z);
   G4ThreeVector beamDir = G4ThreeVector(0,0,1);
   G4double thetaAngle = foilToDetRay.angle(beamDir)*180.0/3.1415;
-  G4cout << "thetaAngle = " << thetaAngle << " degrees." << G4endl;
+  //G4cout << "thetaAngle = " << thetaAngle << " degrees." << G4endl;
 
   return hL;
 }
-

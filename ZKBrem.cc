@@ -5,13 +5,13 @@
 // auth: Zach Hartwig
 // mail: hartwig@psfc.mit.edu
 //
-// desc: 
+// desc:
 //
 /////////////////////////////////////////////////////////////////////////////////
 
 
 // Geant4 classes
-#include "G4RunManager.hh" 
+#include "G4RunManager.hh"
 #include "G4TransportationManager.hh"
 #include "G4UImanager.hh"
 #include "G4UIterminal.hh"
@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
 	   << G4endl;
     G4Exception("ZKBrem main()", "ZKBremMainException001", FatalException, "ZK EXCEPTION: Evasive maneuvers!\n");
   }
-  
+
   G4String ZK_TOPDIR = (G4String)std::getenv("ZKBREM_TOPDIR");
   G4String ZK_RUNTIMEDIR = ZK_TOPDIR+"/runtime";
-  
+
 
   ////////////////////////////////
   // Parse command line options //
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
     // G4cout<<"\n\nZKBrem (vis option) (macro name) (seed/label) (LYSO/LaBr3) (plate/target) (beam E) (beam dist) (false dets) (filters)\n\n";
 
-    
+
 
     return 1;
   }
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
       visQt = true;
     }
   }
-  
+
   // The user may specify an alternate macro file for MPI mode;
   // otherwise, the default will be used.
   G4String MPIMacroName = ZK_RUNTIMEDIR+"/ZK.mac";
@@ -126,21 +126,21 @@ int main(int argc, char *argv[])
   int manualp = 0;
   if(argc>3)
     manualp = atoi(argv[3]);
-    
+
   int plateconf = 0;
   if (argc>5)
     plateconf = atoi(argv[5]);
-    
+
   if (plateconf<0)
   {
     G4cout<<"\n\nInvalid plate configuration option flag! ABORT!\n\n";
     exit(-1);
   }
-    
+
   int lysoconf = 0;
   if (argc>4)
     lysoconf = atoi(argv[4]);
-    
+
   if (lysoconf>5 || lysoconf<0)
   {
     G4cout<<"\n\nInvalid LYSO configuration option flag! ABORT!\n\n";
@@ -173,13 +173,13 @@ int main(int argc, char *argv[])
 
   // Select whether ZK architecture is sequential or parallel based on
   // the binary name (sequential=="ZK"), parallel=="ZK_MPI")
-  
+
 G4bool sequentialBuild = true;
   std::string arg0 = argv[0];
   if(arg0=="ZKBrem_MPI")
     sequentialBuild = false;
-  
-  
+
+std::cout << "Sequential Build Set to: " << sequentialBuild << std::endl;
   //////////////////////////////////////////////
   // Initialize mandatory/user Geant4 classes //
   //////////////////////////////////////////////
@@ -189,14 +189,15 @@ G4bool sequentialBuild = true;
 
     // Initialize MPI before all the user classes
 #ifdef ZK_MPI_ENABLED
+  std::cout << "ZK_MPI_ENABLED" << std::endl;
   const G4int argcMPI = 2;
   char *argvMPI[argcMPI];
   argvMPI[0] = argv[0]; // binary name
   argvMPI[1] = (char *)"/tmp/ZKSlave"; // slave file base name
-
+  std::cout << "Instantiating MPIManager" << std::endl;
   MPIManager *theMPIManager = new MPIManager(argcMPI,argvMPI);
 #endif
-  
+
   // Assign the mandatory user-derived classes to the run manager and
   // initialize it before creation of the user actions so that it can
   // be subsequently accessed from the constructors of the user action
@@ -211,7 +212,7 @@ G4bool sequentialBuild = true;
 
   theRunManager->SetUserAction(new PGA(beamtype,beammode,beamoffset,particle));
   theRunManager->Initialize();
-  
+
   // Create the user action classess and assign to the run manager
   steppingAction *SteppingAction = new steppingAction();
   theRunManager->SetUserAction(SteppingAction);
@@ -231,8 +232,8 @@ G4bool sequentialBuild = true;
   ////////////////////////////////////
 
   G4ScoringManager* theScoringManager = G4ScoringManager::GetScoringManager();
-  
-  
+
+
   /////////////////////////////////////////////////////////////////
   // Initialize the user-interface manager with defaults/aliases //
   /////////////////////////////////////////////////////////////////
@@ -264,7 +265,7 @@ G4bool sequentialBuild = true;
     // Set the default particle source
     UImanager->ApplyCommand("{ebeam}");
     UImanager->ApplyCommand("/ZK/root/init");
-  }  
+  }
 
 
   /////////////////////////////////
@@ -278,23 +279,23 @@ G4bool sequentialBuild = true;
   //runMetadata *theMetadata = new runMetadata();
   //theRSManager->SetMetadata(theMetadata);
 
-  
+
   ///////////////////////////////////////
   // Current ZK instance is sequential //
   ///////////////////////////////////////
 
   if(sequentialBuild){
-    
+
     // ZKBrem presently always randomizes its RNG seed; changing
     // conditional to false will start all simulations with same seed
     if(true)
       CLHEP::HepRandom::setTheSeed(time(0) + 42);
-    
+
     // Only include visualization capabilities if Geant4 has been
     // built with the G4VIS_USE flag
     G4VisManager *visManager = new G4VisExecutive;
     visManager->Initialize();
-    
+
     // Color particle trajectories by particle type
     G4TrajectoryDrawByParticleID *colorModel = new G4TrajectoryDrawByParticleID;
     colorModel->Set("neutron", "cyan");
@@ -305,7 +306,7 @@ G4bool sequentialBuild = true;
     colorModel->SetDefault("gray");
     visManager->RegisterModel(colorModel);
     visManager->SelectTrajectoryModel(colorModel->Name());
-    
+
     // At present, two options are provided for visualization and
     // control of ZK with sequential architecture.  First, the hotness
     // of G4UI graphical user interface using Qt; second standard
@@ -337,71 +338,34 @@ G4bool sequentialBuild = true;
 	         UImanager->ApplyCommand("/control/execute {run}/ZK.OGLIX.vis");
 	         UImanager->ApplyCommand("/vis/scene/add/trajectories");
 	         UImanager->ApplyCommand("/vis/scene/add/hits");
+           delete visManager;
          }
-    
-         // Create a decent 'tcsh'-like prompt for tab completion, command
-         // history, etc.  Also, style points for cooler prompt
-         G4String prompt = "ZK >> ";
-         G4int maxHist = 200;
-         G4UIsession* session = new G4UIterminal(new G4UItcsh(prompt, maxHist));
-
-
-         // As Gallagher said: "Styyyyyyyyyyyle!"
-         G4cout << "\n\n"
-	        << "\t\t    ZZZZZZZ    K    K             \n"
-	        << "\t\t          Z    K   K              \n"
-	        << "\t\t         Z     K  K               \n"
-	        << "\t\t        Z      KKK                \n"
-    	    << "\t\t     ZZZZZ     K  K               \n"
-	        << "\t\t      Z        K   K              \n"
-	        << "\t\t     Z  ERO    K    K NOWLEDGE    \n"
-	        << "\t\t    Z          K    K             \n"
-	        << "\t\t    ZZZZZZ     K    K             \n"
-	        << "\n\n      *******    WELCOME TO THE ZKBrem SIMULATION    *******\n\n\n"
-	        << G4endl;
-         
-         session->SessionStart();
-         delete session;
-    
-         if(visualization)
-            delete visManager;
       }
-      
+
   }
-  
+
   /////////////////////////////////////
   // Current ZK instance is parallel //
   /////////////////////////////////////
-  
-#ifdef ZK_MPI_ENABLED  
+
+#ifdef ZK_MPI_ENABLED
   else{
     // Internally assign niceness of 19 to parallel builds of ZK
     G4int priority = 19;
     setpriority(PRIO_PROCESS,getpid(),priority);
-
-    // The MPIManager requires explicit command line inputs.  Since ZK
-    // needs to be configured by the user via the argv array, create
-    // special argc/argv inputs for MPI parallelization
-    //const G4int argcMPI = 2;
-    //char *argvMPI[argcMPI];
-    //argvMPI[0] = argv[0]; // binary name
-    //argvMPI[1] = (char *)"/tmp/ZKSlave"; // slave file base name
-    
-    // Create the Open MPI manager
-    //MPIManager *theMPIManager= new MPIManager(argcMPI,argvMPI);
 
     G4int MPI_Rank = theMPIManager->GetRank();
 
     // Changing to false will use same seed for all nodes
     if(true)
       CLHEP::HepRandom::setTheSeed(time(0) + 7*MPI_Rank);
-    
+
     // ZK with MPI is setup to run all commands in batch mode from a
     // script. The default script is "runtime/ZK.mpi.mac" although the
     // user may specify a different macro as the 2nd cmd line arg.
     G4String macroCmd = "/control/execute " + MPIMacroName;
     UImanager->ApplyCommand(macroCmd);
-    
+
     delete theMPIManager;
   }
 #endif
@@ -410,11 +374,7 @@ G4bool sequentialBuild = true;
 
   delete theRSManager;
 
-  //delete theMetadata;
-  
   delete theRunManager;
 
-  G4cout << "\n" << G4endl;
-  
   return 0;
 }
