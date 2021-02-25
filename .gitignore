@@ -1,0 +1,9 @@
+# name: .gitignore
+# date: 16 May 15
+# auth: Zach Hartwig
+# mail: hartwig@psfc.mit.edu
+# desc: Git file to ignore unwanted and/or transient files from the repo
+
+~
+lib/*
+converter*

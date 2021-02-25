@@ -1,0 +1,29 @@
+#
+##########################################################################
+#
+# name: ZK.mac
+# date: 17 Sep 14
+# auth: Zach Hartwig
+# mail: hartwig@psfc.mit.edu
+# 
+# desc: This is an all-purpose macro file to contain a sequence of
+#       user-specificed commands that can easily be executed for
+#       convenience.
+# 
+##########################################################################
+#
+# Open a new ROOT file
+/ZK/root/setFileName defaultFile.root
+/ZK/root/init
+#
+# Set the GPS parameters to an incident electron beam 
+#{ebeam}
+#
+# Check the geometry
+/geometry/test/run
+#
+# Run particles
+/ZK/mpiBeamOn 1000000
+#
+# Write the ROOT file
+/ZK/root/write
