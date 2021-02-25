@@ -89,7 +89,6 @@ CXX := mpic++
 
 # Necessary flags for parallel compilation
 CPPFLAGS += -I$(ZKBREM_MPIHOME)/include/
-endif
 
 .PHONY:
 
